@@ -643,7 +643,7 @@ copyBtn.addEventListener('click', async function () {
   const names = Array.from(state.taboo).filter(function (v) { return v !== 'none'; })
                   .map(function (v) { return TABOO_LABEL[v]; });
   lines.push('忌口：' + (names.length ? names.join('、') : '没有'));
-  lines.push('餐厅就定「' + rName.textContent + '」，等你来接我 😊');
+  lines.push('餐厅就定「' + rName.textContent + '」，不见不散哦 😊');
   const text = lines.join('\n');
   copyText.value = text;
   copyText.hidden = false;
