@@ -1,0 +1,705 @@
+<!doctype html>
+<!--
+  ═══════════════════════════════════════════════════════════════
+  一封小小的约会邀请 · 使用说明
+  ─────────────────────────────────────────────────────────────
+  1) 改餐厅/地址/时间：全文搜索「【改成你自己的】」，一共 2 处
+     （第 1 处：约会时间；第 2 处：餐厅匹配表，含每家店的名字、
+       地址和一句推荐语）
+  2) 改文案：正文都是大白话，直接在 <section> 里改中文即可
+  3) 发出去之前：建议自己先把所有组合点一遍，再找一位朋友
+     帮你试一遍 👌
+  ═══════════════════════════════════════════════════════════════
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDE7DF">
+<title>一封小小的约会邀请</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   设计基调（莫兰迪 · 信笺）
+   像一张米色信纸：暖米灰打底，豆沙粉作主强调，
+   灰绿 / 灰紫只做点缀。楷体做标题，细黑体做正文。
+   ═══════════════════════════════════════════════════════ */
+:root {
+  color-scheme: light;
+  /* —— 颜色 —— */
+  --bg:        #EDE7DF;   /* 暖米灰 · 页面底色（信纸） */
+  --card:      #F7F3EC;   /* 米白 · 卡片 / 按钮底 */
+  --edge:      #DFD4C6;   /* 细边框 */
+  --ink:       #57504A;   /* 主文字 · 深灰褐 */
+  --ink-soft:  #97897D;   /* 次文字 · 浅灰褐 */
+  --rose:      #C39B94;   /* 豆沙粉 · 主强调 */
+  --rose-deep: #A97F78;   /* 深豆沙 · 按下 / 选中文字 */
+  --rose-wash: #F1E4DF;   /* 粉晕 · 选中底色 */
+  --sage:      #A3B29B;   /* 灰绿 · 点缀 */
+  --lav:       #B9ABC2;   /* 灰紫 · 点缀 */
+  /* —— 字体 —— */
+  --hand: "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Yuanti SC", "Songti SC", serif;
+  --sans: "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 300;
+  color: var(--ink);
+  background:
+    radial-gradient(90vw 60vh at 88% -5%, rgba(195, 155, 148, .12), transparent 68%),
+    radial-gradient(80vw 55vh at -8% 105%, rgba(163, 178, 155, .12), transparent 68%),
+    var(--bg);
+  background-color: var(--bg);
+  padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 飘落的爱心 / 星光 ───────────────────────────── */
+.petal-field {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.petal {
+  position: absolute;
+  top: -8%;
+  color: var(--c, var(--rose));
+  opacity: .5;
+  animation: fall var(--dur, 14s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+.petal svg {
+  display: block;
+  width: var(--size, 14px);
+  height: var(--size, 14px);
+  fill: currentColor;
+  animation: sway 2.6s ease-in-out infinite alternate;
+}
+@keyframes fall {
+  from { transform: translateY(0); }
+  to   { transform: translateY(118vh); }
+}
+@keyframes sway {
+  from { transform: translateX(-1.4vw) rotate(-14deg); }
+  to   { transform: translateX(1.4vw)  rotate(16deg); }
+}
+
+/* ── 页面骨架 ─────────────────────────────────── */
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 24px 22px;
+}
+.page {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: calc(100vh - 48px);
+  min-height: calc(100svh - 48px);
+}
+.page.active { display: flex; }
+.page.leaving { animation: leave .18s ease both; }
+@keyframes leave {
+  to { opacity: 0; transform: translateY(-12px); }
+}
+
+/* 每页内容的淡入 + 上浮（用 --d 排出先后层次） */
+.page.active .rise {
+  animation: rise .7s cubic-bezier(.22, .61, .36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── 文字 ─────────────────────────────────────── */
+h1, h2, .card-name {
+  font-family: var(--hand);
+  font-weight: 400;
+  letter-spacing: .05em;
+  text-wrap: balance;
+  margin: 0;
+}
+h1 { font-size: 31px; line-height: 1.4; }
+h2 { font-size: 25px; line-height: 1.5; }
+
+.eyebrow {
+  font-family: var(--hand);
+  font-size: 14px;
+  letter-spacing: .34em;
+  text-indent: .34em;   /* 让字距在视觉上居中 */
+  color: var(--ink-soft);
+  margin: 26px 0 10px;
+}
+.lead {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--ink);
+  margin: 18px 0 0;
+  max-width: 21em;
+}
+.hint {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 10px 0 0;
+  letter-spacing: .05em;
+}
+
+/* 步骤进度（三个小圆点，选到第几步亮到第几步） */
+.dots { display: flex; gap: 9px; margin-bottom: 22px; }
+.dots i {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--edge);
+}
+.dots i.on { background: var(--rose); }
+
+/* ── 选项按钮 ─────────────────────────────────── */
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 30px;
+}
+.choice {
+  appearance: none;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  padding: 15px 10px;
+  cursor: pointer;
+  transition: background .22s, border-color .22s, color .22s, transform .12s;
+}
+.choice:active { transform: scale(.96); }
+.choice.picked {
+  background: var(--rose-wash);
+  border-color: var(--rose);
+  color: var(--rose-deep);
+}
+.choice.wide { grid-column: 1 / -1; }
+
+/* 主按钮（开始 / 看结果） */
+.cta {
+  appearance: none;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: .12em;
+  color: #FCFAF7;
+  background: var(--rose);
+  border: none;
+  border-radius: 999px;
+  padding: 15px 44px;
+  margin-top: 38px;
+  cursor: pointer;
+  transition: background .22s, transform .12s, opacity .25s;
+  box-shadow: 0 6px 18px rgba(169, 127, 120, .28);
+}
+.cta:hover { background: var(--rose-deep); }
+.cta:active { transform: scale(.97); }
+.cta[disabled] { opacity: .45; cursor: default; }
+.cta[disabled]:hover { background: var(--rose); }
+
+/* 文字小按钮（上一步 / 再选一次） */
+.link-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: .08em;
+  margin-top: 26px;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+.link-btn:hover { color: var(--rose-deep); }
+
+/* ── 结果卡（预约卡）───────────────────────────── */
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 18px;
+  padding: 34px 26px 28px;
+  margin-top: 28px;
+  box-shadow: 0 10px 30px rgba(87, 80, 74, .07);
+}
+.card-hole {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 9px; height: 9px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--edge);
+}
+.card-eyebrow {
+  font-size: 12px;
+  letter-spacing: .28em;
+  text-indent: .28em;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+}
+.card-name {
+  font-size: 29px;
+  color: var(--rose-deep);
+  line-height: 1.45;
+}
+.card-why {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  margin: 10px 0 0;
+  line-height: 1.8;
+}
+.card-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  color: var(--sage);
+}
+.card-line span { flex: 1; border-top: 1px dashed var(--edge); }
+.card-line svg { width: 11px; height: 11px; fill: currentColor; }
+.card-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 400;
+  margin: 9px 0;
+  text-align: left;
+}
+.card-row em {
+  font-style: normal;
+  flex: 1;
+  max-width: 15em;
+}
+.card-taboo {
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  background: var(--rose-wash);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 18px 0 0;
+}
+.result-note {
+  font-size: 15px;
+  margin: 26px 0 0;
+  letter-spacing: .04em;
+}
+
+/* 复制结果按钮 + 结果文字框（复制失败时可长按它手动复制） */
+.cta-ghost {
+  appearance: none;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--rose-deep);
+  background: transparent;
+  border: 1px solid var(--rose);
+  border-radius: 999px;
+  padding: 12px 34px;
+  margin-top: 24px;
+  cursor: pointer;
+  transition: background .22s, transform .12s;
+}
+.cta-ghost:hover { background: var(--rose-wash); }
+.cta-ghost:active { transform: scale(.97); }
+.copy-box {
+  width: 100%;
+  max-width: 340px;
+  margin-top: 16px;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  background: var(--card);
+  border: 1px dashed var(--edge);
+  border-radius: 12px;
+  padding: 14px 16px;
+  resize: none;
+}
+
+/* 封面 · 信封 */
+.cover-env { margin-top: -6vh; }
+.env-heart { animation: heartFloat 3.4s ease-in-out infinite; }
+@keyframes heartFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* ── 无障碍：减少动态效果 ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .petal-field { display: none; }
+  .env-heart { animation: none; }
+  .page.active .rise { animation: none; }
+  .choice, .cta { transition: none; }
+}
+
+button:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 3px;
+}
+</style>
+</head>
+<body>
+
+<!-- 飘落的爱心 / 星光（由 JS 生成） -->
+<div class="petal-field" id="petalField" aria-hidden="true"></div>
+
+<main>
+
+  <!-- ═══════════ 第 1 页 · 封面 ═══════════ -->
+  <section class="page active" id="page-cover">
+    <div class="cover-env rise" style="--d:.05s">
+      <svg width="150" viewBox="0 0 150 110" role="img" aria-label="一封探出小爱心的信封">
+        <!-- 探出的小爱心（下半藏在信封里） -->
+        <path class="env-heart" d="M75 46 C55 34 45 26 45 15 C45 5 56 2 61 7 C65 11 73 18 75 21 C77 18 85 11 89 7 C94 2 105 5 105 15 C105 26 95 34 75 46 Z" fill="var(--rose)"/>
+        <!-- 信封 -->
+        <rect x="15" y="38" width="120" height="64" rx="10" fill="var(--card)" stroke="var(--edge)" stroke-width="1.5"/>
+        <path d="M19 44 L75 82 L131 44" fill="none" stroke="var(--edge)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- 小邮戳 -->
+        <circle cx="118" cy="56" r="9" fill="none" stroke="var(--sage)" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>
+        <path d="M118 51.5 c-1.2-2 -4.5-1.5 -4.5 .9 c0 1.9 2.5 3.1 4.5 4.6 c2-1.5 4.5-2.7 4.5-4.6 c0-2.4 -3.3-2.9 -4.5-.9 z" fill="var(--sage)" opacity=".8"/>
+      </svg>
+    </div>
+    <p class="eyebrow rise" style="--d:.15s">见 字 如 面</p>
+    <h1 class="rise" style="--d:.25s">一封小小的<br>约会邀请</h1>
+    <p class="lead rise" style="--d:.35s">嗨，有个问题想问你很久了——<br>愿意和我一起吃顿饭吗？</p>
+    <p class="lead rise" style="--d:.45s;color:var(--ink-soft)">别急着回答，先帮我做几个小选择，<br>我好带你去最对味的地方 😊</p>
+    <button class="cta rise" style="--d:.55s" id="startBtn" type="button">开始选择 →</button>
+  </section>
+
+  <!-- ═══════════ 第 2 页 · 口味（单选）═══════════ -->
+  <section class="page" id="page-taste">
+    <div class="dots rise" style="--d:.05s" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    <h2 class="rise" style="--d:.15s">那天的你，<br>想要哪种味道？</h2>
+    <p class="hint rise" style="--d:.25s">跟着感觉选就好，没有标准答案</p>
+    <div class="choices rise" style="--d:.35s" id="tasteChoices">
+      <button class="choice" type="button" data-spice="hot">无辣不欢</button>
+      <button class="choice" type="button" data-spice="mid">微辣就好</button>
+      <button class="choice" type="button" data-spice="light">清淡一点</button>
+      <button class="choice" type="button" data-spice="any">都可以你决定</button>
+    </div>
+    <button class="link-btn rise" style="--d:.45s" type="button" data-back="page-cover">← 上一步</button>
+  </section>
+
+  <!-- ═══════════ 第 3 页 · 菜系（单选）═══════════ -->
+  <section class="page" id="page-cuisine">
+    <div class="dots rise" style="--d:.05s" aria-hidden="true"><i></i><i class="on"></i><i></i></div>
+    <h2 class="rise" style="--d:.15s">那……<br>想吃点什么？</h2>
+    <p class="hint rise" style="--d:.25s">不急，慢慢想</p>
+    <div class="choices rise" style="--d:.35s" id="cuisineChoices">
+      <button class="choice" type="button" data-cuisine="hotpot">火锅</button>
+      <button class="choice" type="button" data-cuisine="japanese">日料</button>
+      <button class="choice" type="button" data-cuisine="western">西餐</button>
+      <button class="choice" type="button" data-cuisine="korean">韩料</button>
+      <button class="choice" type="button" data-cuisine="sea">东南亚菜</button>
+      <button class="choice" type="button" data-cuisine="sichuan">川菜</button>
+      <button class="choice wide" type="button" data-cuisine="any">交给你挑</button>
+    </div>
+    <button class="link-btn rise" style="--d:.45s" type="button" data-back="page-taste">← 上一步</button>
+  </section>
+
+  <!-- ═══════════ 第 4 页 · 忌口（可多选）══════════ -->
+  <section class="page" id="page-taboo">
+    <div class="dots rise" style="--d:.05s" aria-hidden="true"><i></i><i></i><i class="on"></i></div>
+    <h2 class="rise" style="--d:.15s">有什么不吃<br>或忌口的吗？</h2>
+    <p class="hint rise" style="--d:.25s">告诉我，我提前跟餐厅说好 😊</p>
+    <div class="choices rise" style="--d:.35s" id="tabooChoices">
+      <button class="choice" type="button" data-taboo="cilantro">不吃香菜</button>
+      <button class="choice" type="button" data-taboo="scallion">不吃葱蒜</button>
+      <button class="choice" type="button" data-taboo="seafood">不吃海鲜</button>
+      <button class="choice" type="button" data-taboo="offal">不吃内脏</button>
+      <button class="choice" type="button" data-taboo="beef">不吃牛肉</button>
+      <button class="choice" type="button" data-taboo="veg">素食</button>
+      <button class="choice wide" type="button" data-taboo="none">没有忌口</button>
+    </div>
+    <button class="cta rise" style="--d:.45s" id="confirmBtn" type="button" hidden>选好啦，看结果 →</button>
+    <button class="link-btn rise" style="--d:.55s" type="button" data-back="page-cuisine">← 上一步</button>
+  </section>
+
+  <!-- ═══════════ 结果页 ═══════════ -->
+  <section class="page" id="page-result">
+    <div class="dots rise" style="--d:.05s" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+    <h2 class="rise" style="--d:.15s">🎉 选好啦！</h2>
+    <p class="hint rise" style="--d:.25s">根据你的口味，我为你选了</p>
+
+    <div class="card rise" style="--d:.35s">
+      <div class="card-hole" aria-hidden="true"></div>
+      <p class="card-eyebrow">我 们 要 去 的 地 方</p>
+      <h3 class="card-name" id="rName">——</h3>
+      <p class="card-why" id="rWhy"></p>
+      <div class="card-line" aria-hidden="true">
+        <span></span>
+        <svg viewBox="0 0 24 24"><path d="M12 0 C13.2 8 16 10.8 24 12 C16 13.2 13.2 16 12 24 C10.8 16 8 13.2 0 12 C8 10.8 10.8 8 12 0 Z"/></svg>
+        <span></span>
+      </div>
+      <p class="card-row">📍 <em id="rAddr"></em></p>
+      <p class="card-row">🕕 <em id="rTime"></em></p>
+      <p class="card-taboo" id="rTaboo" hidden></p>
+    </div>
+
+    <p class="result-note rise" style="--d:.5s">那就这么定啦，不见不散哦 😊</p>
+    <button class="cta-ghost rise" style="--d:.6s" id="copyBtn" type="button">复制结果，去发给她 →</button>
+    <textarea class="copy-box rise" id="copyText" readonly aria-label="你的选择结果，长按可全选复制" hidden></textarea>
+    <button class="link-btn rise" style="--d:.7s" type="button" id="restartBtn">← 再选一次</button>
+  </section>
+
+</main>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   一、要改的内容都在这里
+   ════════════════════════════════════════════════════════════ */
+
+/* ══【改成你自己的】第 1 处：约会时间 ═══════════════════════ */
+const DATE_TIME = '10月5日 · 晚上 6:00';
+
+/* ══【改成你自己的】第 2 处：餐厅信息 ═══════════════════════
+   下面 addr 现在都是同一个占位地址，把它换成真实地址即可。
+   想每家店地址不同：把 addr 后面换成各自的字符串。
+   name = 店名（会大字显示） why = 店名下面那句小推荐语          */
+
+const ADDR_SHAN   = '虹桥路1号 港汇恒隆广场北座 5楼532';
+const ADDR_FULAI = '虹桥路1号 港汇恒隆广场南座 F6';
+const ADDR_PS     = '虹桥路1号 港汇恒隆广场北座 3楼306';
+const ADDR_PROF   = '虹桥路1号 港汇恒隆广场 3楼306-A';
+const ADDR_TML    = '虹桥路1号 港汇恒隆广场中庭 3楼305';
+const ADDR_YEGO   = '虹桥路1号 港汇恒隆广场北座 5楼531（近恭城路）';
+
+/* 心里已经有数、最有把握的那家（她选「都可以你决定」时用它） */
+const BEST_NAME = '映泸沽·野生菌汤·云南料理(港汇恒隆广场店)';   /* ← 云南菜·已确认 */
+const BEST_ADDR = '虹桥路1号 港汇恒隆广场北座 5楼533';
+
+/* 口味 × 菜系 的完整匹配表：
+   键 = 辣度_菜系（hot 无辣不欢 / mid 微辣就好 / light 清淡一点）
+   （hotpot 火锅 / japanese 日料 / western 西餐 / korean 韩料 / sea 东南亚）*/
+const COMBO = {
+  /* —— 无辣不欢 —— */
+  'hot_hotpot':    { name: '山缓缓火锅(上海港汇恒隆店)',              addr: ADDR_SHAN,   why: '火锅热热闹闹，锅底交给我来配' },
+  'hot_korean':    { name: 'Professor Lee(港汇恒隆店)',           addr: ADDR_PROF,   why: '滋味热烈又满足，正对你胃口' },
+  'hot_japanese':  { name: '满来寿喜烧·雅苑(港汇店)',          addr: ADDR_FULAI, why: '热气腾腾一锅，换个花样也过瘾' },
+  'hot_western':   { name: 'PS.Cafe(港汇店)',                 addr: ADDR_PS,     why: '我研究过菜单了，有你能吃的那口辣' },
+  'hot_sea':       { name: 'The Market Lane·Reserve(港汇恒隆店)', addr: ADDR_TML,    why: '这家味道有惊喜，放心交给我' },
+  'hot_sichuan':   { name: '野果 YEEGO',              addr: ADDR_YEGO,   why: '正宗川味，麻和辣都给你安排明白' },
+  /* —— 微辣就好 —— */
+  'mid_hotpot':    { name: '山缓缓火锅(上海港汇恒隆店)',              addr: ADDR_SHAN,   why: '微微辣刚刚好，暖胃又暖心' },
+  'mid_korean':    { name: 'Professor Lee(港汇恒隆店)',           addr: ADDR_PROF,   why: '滋味刚刚好，满足又不腻' },
+  'mid_japanese':  { name: '满来寿喜烧·雅苑(港汇店)',          addr: ADDR_FULAI, why: '小锅慢煮，吃得舒服又自在' },
+  'mid_western':   { name: 'PS.Cafe(港汇店)',                 addr: ADDR_PS,     why: '灯光刚刚好，慢慢吃慢慢聊' },
+  'mid_sea':       { name: 'The Market Lane·Reserve(港汇恒隆店)', addr: ADDR_TML,    why: '味道有层次，吃得开心不腻' },
+  'mid_sichuan':   { name: '野果 YEEGO',              addr: ADDR_YEGO,   why: '微微辣的川菜，够味不过火' },
+  /* —— 清淡一点 —— */
+  'light_hotpot':  { name: '山缓缓火锅(上海港汇恒隆店)',              addr: ADDR_SHAN,   why: '热腾腾一锅，清淡也可以很鲜' },
+  'light_korean':  { name: 'Professor Lee(港汇恒隆店)',           addr: ADDR_PROF,   why: '温温润润的一餐，舒服不刺激' },
+  'light_japanese':{ name: '满来寿喜烧·雅苑(港汇店)',          addr: ADDR_FULAI, why: '温柔的一餐，安安静静吃顿好的' },
+  'light_western': { name: 'PS.Cafe(港汇店)',                 addr: ADDR_PS,     why: '有花有光的地方，慢慢吃慢慢聊' },
+  'light_sea':     { name: 'The Market Lane·Reserve(港汇恒隆店)', addr: ADDR_TML,    why: '清爽温柔，吃得舒服没负担' },
+  'light_sichuan': { name: '野果 YEEGO',              addr: ADDR_YEGO,   why: '川菜也有温柔的一面，我挑好了' }
+};
+
+const TABOO_LABEL = {
+  cilantro: '不吃香菜', scallion: '不吃葱蒜', seafood: '不吃海鲜',
+  offal: '不吃内脏', beef: '不吃牛肉', veg: '素食'
+};
+
+/* 她复制发回给你的那段话里，口味和菜系用这两个翻译表 */
+const SPICE_LABEL = { hot: '无辣不欢', mid: '微辣就好', light: '清淡一点', any: '口味都行，你来定' };
+const CUISINE_LABEL = { hotpot: '火锅', japanese: '日料', western: '西餐', korean: '韩料', sea: '东南亚菜', sichuan: '川菜', any: '你来挑' };
+
+/* ════════════════════════════════════════════════════════════
+   二、状态与页面切换
+   ════════════════════════════════════════════════════════════ */
+const state = { spice: null, cuisine: null, taboo: new Set() };
+let navLock = false;
+
+function goPage(nextId) {
+  if (navLock) return;
+  navLock = true;
+  const cur = document.querySelector('.page.active');
+  const next = document.getElementById(nextId);
+  cur.classList.add('leaving');
+  setTimeout(function () {
+    cur.classList.remove('active', 'leaving');
+    next.classList.add('active');
+    navLock = false;
+  }, 180);
+}
+
+/* 「← 上一步」 */
+document.querySelectorAll('[data-back]').forEach(function (btn) {
+  btn.addEventListener('click', function () { goPage(btn.dataset.back); });
+});
+
+/* ── 口味：单选，选完自动跳下一页 ── */
+document.querySelectorAll('#tasteChoices .choice').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    if (navLock) return;
+    state.spice = btn.dataset.spice;
+    document.querySelectorAll('#tasteChoices .choice').forEach(function (b) {
+      b.classList.toggle('picked', b === btn);
+    });
+    setTimeout(function () { goPage('page-cuisine'); }, 380);
+  });
+});
+
+/* ── 菜系：单选 ── */
+document.querySelectorAll('#cuisineChoices .choice').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    if (navLock) return;
+    state.cuisine = btn.dataset.cuisine;
+    document.querySelectorAll('#cuisineChoices .choice').forEach(function (b) {
+      b.classList.toggle('picked', b === btn);
+    });
+    setTimeout(function () { goPage('page-taboo'); }, 380);
+  });
+});
+
+/* ── 忌口：多选；「没有忌口」与其他项互斥 ── */
+document.querySelectorAll('#tabooChoices .choice').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    const v = btn.dataset.taboo;
+    if (v === 'none') {
+      const turnOn = !btn.classList.contains('picked');
+      document.querySelectorAll('#tabooChoices .choice').forEach(function (b) {
+        b.classList.remove('picked');
+      });
+      state.taboo.clear();
+      if (turnOn) { btn.classList.add('picked'); state.taboo.add('none'); }
+    } else {
+      btn.classList.toggle('picked');
+      if (btn.classList.contains('picked')) state.taboo.add(v);
+      else state.taboo.delete(v);
+      /* 选了具体忌口 → 自动取消「没有忌口」 */
+      const noneBtn = document.querySelector('[data-taboo="none"]');
+      noneBtn.classList.remove('picked');
+      state.taboo.delete('none');
+    }
+    confirmBtn.hidden = state.taboo.size === 0;
+  });
+});
+
+/* ── 看结果 ── */
+confirmBtn.addEventListener('click', showResult);
+
+function pickRestaurant() {
+  if (state.spice === 'any') {
+    return { name: BEST_NAME, addr: BEST_ADDR, why: '味道你都交给我，那这家我最拿手，等你点头就订' };
+  }
+  if (state.cuisine === 'any') {
+    return { name: BEST_NAME, addr: BEST_ADDR, why: '交给我来挑的话——就去这家，我有把握你会喜欢' };
+  }
+  return COMBO[state.spice + '_' + state.cuisine] || { name: BEST_NAME, addr: BEST_ADDR, why: '' };
+}
+
+function showResult() {
+  const r = pickRestaurant();
+  rName.textContent = r.name;
+  rWhy.textContent = r.why;
+  rAddr.textContent = r.addr;
+  rTime.textContent = DATE_TIME;
+  /* 忌口复读一遍：让她确认，也提醒你见面时提前打招呼 */
+  const names = Array.from(state.taboo).filter(function (v) { return v !== 'none'; })
+                  .map(function (v) { return TABOO_LABEL[v]; });
+  if (names.length) {
+    rTaboo.textContent = '你说的忌口我都记下了：' + names.join(' · ') + '。到时候我会提前跟餐厅打好招呼。';
+    rTaboo.hidden = false;
+  } else {
+    rTaboo.hidden = true;
+  }
+  goPage('page-result');
+}
+
+/* ── 复制结果：她点一下复制，粘贴到微信发回给你 ── */
+copyBtn.addEventListener('click', async function () {
+  const lines = ['我选好啦 🎉'];
+  lines.push('口味：' + (SPICE_LABEL[state.spice] || '——'));
+  lines.push('想吃：' + (CUISINE_LABEL[state.cuisine] || '——'));
+  const names = Array.from(state.taboo).filter(function (v) { return v !== 'none'; })
+                  .map(function (v) { return TABOO_LABEL[v]; });
+  lines.push('忌口：' + (names.length ? names.join('、') : '没有'));
+  lines.push('餐厅就定「' + rName.textContent + '」，等你来接我 😊');
+  const text = lines.join('\n');
+  copyText.value = text;
+  copyText.hidden = false;
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(text);
+    ok = true;
+  } catch (e) {
+    try {
+      copyText.focus();
+      copyText.select();
+      ok = document.execCommand('copy');
+    } catch (e2) { ok = false; }
+  }
+  copyBtn.textContent = ok ? '已复制 ✓ 快去粘贴发给她' : '点一下上方文字框，长按全选复制';
+});
+
+/* ── 再选一次：清空所有选择，回到口味页 ── */
+restartBtn.addEventListener('click', function () {
+  state.spice = null;
+  state.cuisine = null;
+  state.taboo.clear();
+  document.querySelectorAll('.choice').forEach(function (b) { b.classList.remove('picked'); });
+  confirmBtn.hidden = true;
+  copyBtn.textContent = '复制结果，去发给她 →';
+  copyText.hidden = true;
+  copyText.value = '';
+  goPage('page-taste');
+});
+
+/* ── 封面：开始选择 ── */
+startBtn.addEventListener('click', function () {
+  goPage('page-taste');
+});
+
+/* ════════════════════════════════════════════════════════════
+   三、飘落的小爱心 / 星光
+   ════════════════════════════════════════════════════════════ */
+(function makePetals() {
+  const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21 C5 15 0 11 0 6.5 C0 2.5 3 0 6.5 0 C9 0 11 1.5 12 3.5 C13 1.5 15 0 17.5 0 C21 0 24 2.5 24 6.5 C24 11 19 15 12 21 Z"/></svg>';
+  const STAR = '<svg viewBox="0 0 24 24"><path d="M12 0 C13.2 8 16 10.8 24 12 C16 13.2 13.2 16 12 24 C10.8 16 8 13.2 0 12 C8 10.8 10.8 8 12 0 Z"/></svg>';
+  const COLORS = ['#C39B94', '#A3B29B', '#B9ABC2', '#D9BFAF'];
+  const field = document.getElementById('petalField');
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('i');
+    el.className = 'petal';
+    el.innerHTML = i % 2 === 0 ? HEART : STAR;
+    el.style.left = (Math.random() * 96 + 2) + '%';
+    el.style.setProperty('--size', (Math.random() * 8 + 9).toFixed(0) + 'px');
+    el.style.setProperty('--dur', (Math.random() * 9 + 11).toFixed(1) + 's');
+    el.style.setProperty('--delay', (Math.random() * 16).toFixed(1) + 's');
+    el.style.setProperty('--c', COLORS[i % COLORS.length]);
+    el.style.opacity = (Math.random() * 0.25 + 0.3).toFixed(2);
+    field.appendChild(el);
+  }
+})();
+</script>
+</body>
+</html>
